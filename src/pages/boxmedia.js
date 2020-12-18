@@ -14,7 +14,7 @@ function getData(pageIndex = 0, maxPage = 100) {
             console.log(res);
         })
 
-    // getData(++pageIndex)
+    getData(++pageIndex)
 
 }
 
