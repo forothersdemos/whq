@@ -3,7 +3,8 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 // 所有数据
 const queues = [];
-const quotas = []
+const quotas = [];
+
 getData();
 
 /**
@@ -11,7 +12,7 @@ getData();
  * @param pageIndex 开始遍历的 page
  * @param maxPage 最大页数
  */
-function getData(pageIndex = 1, maxPage = 4) {
+async function getData(pageIndex = 1, maxPage = 4) {
     if (pageIndex > maxPage) {
         return
     }
@@ -22,7 +23,6 @@ function getData(pageIndex = 1, maxPage = 4) {
         .then(res => {
             // 追加存储所有数据
             queues.push(...res.data);
-            console.log(queues.length);
 
             // 解析需要的字段
             let quotaJson = res.data.map(item => ({
@@ -34,19 +34,34 @@ function getData(pageIndex = 1, maxPage = 4) {
                 tags: Object.values(item.tags).join('|'),
                 related_profile: item.related_profile
             }));
-            console.log(quotaJson);
+
             quotas.push(...quotaJson);
+
+            console.log(queues.length, quotas.length)
 
             // 更新到本地 xlsx
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.json_to_sheet(quotas);
             XLSX.utils.book_append_sheet(workbook, worksheet);
             XLSX.writeFile(workbook, 'quota.xlsx');
-        })
+        });
 
+    await sleep(3000);
 
-    getData(++pageIndex)
+    await getData(++pageIndex);
+}
 
+/**
+ *
+ * @param timer : number 单位毫秒
+ * @returns {Promise<unknown>}
+ */
+function sleep(timer = 1000) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, timer)
+    })
 }
 
 
